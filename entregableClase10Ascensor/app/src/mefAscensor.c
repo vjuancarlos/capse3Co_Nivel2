@@ -71,6 +71,7 @@ estadoMefAscensor_t estadoMefAscensor;
 
 uint8_t temporizador = 0;
 delay_t base1seg;
+delay_t movimientoAscensor;
 
 int8_t pisoActual = 0;
 int8_t pisoDestino = 0;
@@ -95,14 +96,14 @@ static bool_t llegoAlPiso( int8_t piso ){
 
 // Moverse hacia abajo
 static void bajarUnPiso( void ){
-   delay( velocidadEntrePisos*1000 );
-   pisoActual--;
+   if (delayRead(&movimientoAscensor))
+      pisoActual--;
 }
 
 // Moverse hacia arriba
 static void subirUnPiso( void ){
-   delay( velocidadEntrePisos*1000 );
-   pisoActual++;
+   if (delayRead(&movimientoAscensor))
+      pisoActual++;
 }
 
 /*==================[definiciones de funciones externas]=====================*/
@@ -222,10 +223,12 @@ void ascensorActualizarMEF( void ){
          if( hayPeticionDeSubirPendiente( pisoActual ) ){ 
             // Existe peticion pendiente de subir
             estadoMefAscensor = SUBIENDO;
+            delayConfig( &movimientoAscensor, velocidadEntrePisos*1000 );
          }
          if( hayPeticionDeBajarPendiente( pisoActual ) ){
             // Existe peticion pendiente de bajar
             estadoMefAscensor = BAJANDO;
+            delayConfig( &movimientoAscensor, velocidadEntrePisos*1000 );
          }
          if( modoConfiguracion ){
             // Se ingresa al modo configuracion

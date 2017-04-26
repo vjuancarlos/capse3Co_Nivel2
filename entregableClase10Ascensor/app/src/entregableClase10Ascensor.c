@@ -49,8 +49,39 @@
 
 /*==================[funcion principal]======================================*/
 
+      /* Configuracion de pines para el Teclado Matricial*/
+
+   // Teclado
+   keypad_t keypad;
+
+   // Filas --> Salidas
+   uint8_t keypadRowPins1[4] = {
+      RS232_TXD, // Row 0
+      CAN_RD,    // Row 1
+      CAN_TD,    // Row 2
+      T_COL1     // Row 3
+   };
+
+   // Columnas --> Entradas con pull-up (MODO = GPIO_INPUT_PULLUP)
+   uint8_t keypadColPins1[4] = {
+      T_FIL0,    // Column 0
+      T_FIL3,    // Column 1
+      T_FIL2,    // Column 2
+      T_COL0     // Column 3
+   };
+
+
+
+
+
+
+   // Variable para guardar la tecla leida
+   uint16_t tecla = 0;
+
 // FUNCION PRINCIPAL, PUNTO DE ENTRADA AL PROGRAMA LUEGO DE ENCENDIDO O RESET.
 int main( void ){
+
+
 
    // ---------- CONFIGURACIONES ------------------------------
    boardConfig();   // Inicializar y configurar la plataforma
@@ -58,6 +89,9 @@ int main( void ){
    ascensorInicializarMEF();         // Inicializar la MEF de ascensor
    ingresoPisoAInicializarMEF();     // Inicializar la MEF de ingreso de piso
    display7SegmentPinConfig_();
+   keypadConfig( &keypad, keypadRowPins1, 4, keypadColPins1, 4 );
+   
+
    
    // ---------- REPETIR POR SIEMPRE --------------------------
    while( TRUE )

@@ -48,9 +48,20 @@
 extern bool_t modoConfiguracion;
 extern int8_t pisoActual;
 extern int8_t pisoDestino;
+extern keypad_t keypad;
+extern uint16_t tecla;
 
 int8_t pisosPendientes[10] = { -128, -128, -128, -128, -128,
                                -128, -128, -128, -128, -128 };
+
+   // Vector de conversion entre indice de tecla presionada y el índice del
+   // display 7 segmentos
+   uint16_t keypadToDesplayKeys[16] = {
+                                           1,    2,    3, 0x0a,
+                                           4,    5,    6, 0x0b,
+                                           7,    8,    9, 0x0c,
+                                        0x0e,    0, 0x0f, 0x0d
+                                      };
                                
 int8_t pisoPendiente = -128;
 
@@ -98,22 +109,11 @@ void ingresoPisoAInicializarMEF( void ){
 
 // Actualizar la MEF de ingreso de piso
 void ingresoPisoActualizarMEF( void ){
-   if( !gpioRead( TEC1 ) ){
-      if( pisoActual != -1 )
-         pisoPendiente = -1;
-   }
-   if( !gpioRead( TEC2 ) ){
-      if( pisoActual != 0 )
-         pisoPendiente = 0;
-   }
-   if( !gpioRead( TEC3 ) ){
-      if( pisoActual != 1 )
-         pisoPendiente = 1;
-   }
-   if( !gpioRead( TEC4 ) ){
-      if( pisoActual != 2 )
-         pisoPendiente = 2;
-   }
+   
+   if( keypadRead( &keypad, &tecla ) ){
+      if( pisoActual != keypadToDesplayKeys[tecla ] )
+         pisoPendiente = keypadToDesplayKeys[tecla ];
+      }
    
    itoaDisplay(pisoActual, toDisplay, 10);
    display7SegmentWrite4Digits_(toDisplay);
