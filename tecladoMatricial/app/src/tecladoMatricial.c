@@ -37,6 +37,13 @@ uint8_t keypadColPins[4] = {
 };
 
 
+// Vector para mostrar tecla presionada por UART
+uint16_t asciiKeypadKeys[16] = {
+                                '1', '2', '3', 'A',
+                                '4', '5', '6', 'B',
+                                '7', '8', '9', 'C',
+                                '*', '0', '#', 'D'
+                               };
 
 // Vector para mostrar tecla presionada en el display 7 segmentos
 uint16_t keypadKeys[16] = {
@@ -45,13 +52,14 @@ uint16_t keypadKeys[16] = {
                                7,    8,    9, 0x0c,
                             0x0e,    0, 0x0f, 0x0d
                           };
+                          
+                          
 /*==================[declaraciones de funciones internas]====================*/
 
 /*==================[declaraciones de funciones externas]====================*/
 
 void configurarTecladoMatricial( void );
-
-bool_t leerTecladoMatricial( void );
+bool_t leerTecladoMatricial( void );                
 
 /*==================[funcion principal]======================================*/
 
@@ -66,12 +74,12 @@ int main( void ){
       
    // ---------- REPETIR POR SIEMPRE --------------------------
    while( TRUE )
-   {            
+   {
       if( leerTecladoMatricial() ){
-         uartWriteByte( UART_USB, key + 49 );
-         delay(500);
+         uartWriteByte( UART_USB, asciiKeypadKeys[key] );
+         delay(50);
       }
-   }
+   } 
 
    // NO DEBE LLEGAR NUNCA AQUI, debido a que a este programa se ejecuta 
    // directamenteno sobre un microcontroladore y no es llamado/ por ningun
@@ -140,23 +148,25 @@ bool_t leerTecladoMatricial( void ){
             // Si dicha tecla esta oresionada (en estado BAJO) entonces retorna
             // graba la tecla en key y retorna TRUE
             if( !gpioRead( keypadColPins[c] ) ){
-               key = r * 4 + c;
                retVal = TRUE;
+               key = r * 4 + c;
+               /*
+                  Formula de las teclas de Teclado Matricial (Keypad)
+                  de 4 filas (rows) * 5 columnas (columns)
+
+                     c0 c1 c2 c3 c4
+                  r0  0  1  2  3  4
+                  r1  5  6  7  8  9   Si se presiona la tecla r[i] c[j]:
+                  r2 10 11 12 13 14   valor = (i) * cantidadDeColumnas + (j)
+                  r3 15 16 17 18 19
+               */
                return retVal;
             }
          }
 
       }
    }
+   return retVal;
 }
-/*
-   Teclado Matricial (Keypad) de 4 filas (rows) * 5 columnas (columns)
-
-      c0 c1 c2 c3 c4
-   r0  0  1  2  3  4
-   r1  5  6  7  8  9    Press r[i] c[j] => (i) * cantidadDeColumnas + (j)
-   r2 10 11 12 13 14
-   r3 15 16 17 18 19
-*/
 
 /*==================[fin del archivo]========================================*/
