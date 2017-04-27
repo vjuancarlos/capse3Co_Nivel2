@@ -53,6 +53,9 @@ uint16_t keypadKeys[16] = {
                             0x0e,    0, 0x0f, 0x0d
                           };
                           
+uint8_t digit = 0;
+uint16_t angle_raw = 0;
+uint8_t data[4];
                           
 /*==================[declaraciones de funciones internas]====================*/
 
@@ -76,8 +79,51 @@ int main( void ){
    while( TRUE )
    {
       if( leerTecladoMatricial() ){
-         uartWriteByte( UART_USB, asciiKeypadKeys[key] );
-         delay(50);
+         
+         switch (asciiKeypadKeys[key]) {
+            case 'A':
+               itoa(angle_raw,data,10);
+               uartWriteString(UART_USB,data);
+               uartWriteString(UART_USB,"\n\r");
+               digit = 0;
+               angle_raw = 0;
+            break;
+         
+            case 'B':
+               digit = 0;
+               angle_raw = 0;
+               uartWriteString(UART_USB,"Cancel");
+               uartWriteString(UART_USB,"\n\r");
+         
+            break;
+         
+            default:
+               if (keypadKeys[key] <= 9) {
+                  switch(digit){
+                     case 0:
+                        angle_raw = keypadKeys[key];
+                     break;
+                     
+                     case 1:
+                        angle_raw = angle_raw*10 + keypadKeys[key];
+                     break;
+                     
+                     case 2:
+                        angle_raw = angle_raw*10 + keypadKeys[key];
+                     break;
+                     
+                     case 3:
+                        angle_raw = angle_raw*10 + keypadKeys[key];
+                     break;
+                  }
+                  digit++;
+                  if (digit > 3)
+                     digit = 0;
+                  }
+                  uartWriteString(UART_USB,asciiKeypadKeys[key]);
+            break;
+         }
+         delay(500);
       }
    } 
 
