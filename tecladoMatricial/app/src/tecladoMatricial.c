@@ -63,7 +63,7 @@ uint8_t data[4];
 
 void configurarTecladoMatricial( void );
 bool_t leerTecladoMatricial( void );                
-
+bool_t valor = 0;
 /*==================[funcion principal]======================================*/
 
 // FUNCION PRINCIPAL, PUNTO DE ENTRADA AL PROGRAMA LUEGO DE ENCENDIDO O RESET.
@@ -74,7 +74,10 @@ int main( void ){
    uartConfig( UART_USB, 115200 ); // Configurar UART a 115200 
   
    configurarTecladoMatricial(); // Configurar teclado matricial
-      
+
+   valor = servoConfig( 0,      SERVO_ENABLE );
+
+   valor = servoConfig( SERVO0, SERVO_ENABLE_OUTPUT );      
    // ---------- REPETIR POR SIEMPRE --------------------------
    while( TRUE )
    {
@@ -83,10 +86,22 @@ int main( void ){
          switch (asciiKeypadKeys[key]) {
             case 'A':
                itoa(angle_raw,data,10);
-               uartWriteString(UART_USB,data);
-               uartWriteString(UART_USB,"\n\r");
+               if ((angle_raw>=0)&&(angle_raw<=180)){
+                  uartWriteString(UART_USB,"El servo se moverá al ángulo ");
+                  uartWriteString(UART_USB,data);
+                  uartWriteString(UART_USB,"\n\r");
+                  servoWrite( SERVO0, angle_raw );
+                  delay(500);
+               }
+
+               else {
+                  uartWriteString(UART_USB,"El valor ingresao es inválido");
+                  uartWriteString(UART_USB,"\n\r");                                 
+               }
+               
                digit = 0;
                angle_raw = 0;
+               
             break;
          
             case 'B':
@@ -120,7 +135,8 @@ int main( void ){
                   if (digit > 3)
                      digit = 0;
                   }
-                  uartWriteString(UART_USB,asciiKeypadKeys[key]);
+                  //uartWriteByte(UART_USB,asciiKeypadKeys[key]);
+                  //uartWriteString(UART_USB,"\n\r");
             break;
          }
          delay(500);
